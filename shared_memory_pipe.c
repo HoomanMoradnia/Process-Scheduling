@@ -93,6 +93,5 @@ int main() {
         printf("Child: Shared memory detached.\n");
         exit(0);
     }
-
     return 0;
 }
