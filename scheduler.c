@@ -11,6 +11,7 @@ typedef struct {
     int priority;
     int waiting_time;
     int turnaround_time;
+    int leave_time;
 } Process;
 
 void input_processes(Process processes[], int *n, int with_priority, int with_remaining_time) {
@@ -39,16 +40,17 @@ void input_processes(Process processes[], int *n, int with_priority, int with_re
 void print_results(Process processes[], int n, float total_waiting_time, float total_turnaround_time, int with_priority) {
     printf("\nProcess\tArrival\tBurst");
     if (with_priority) printf("\tPriority");
-    printf("\tWaiting\tTurnaround\n");
+    printf("\tWaiting\tTurnaround\tLeave Time\n");
     for (int i = 0; i < n; i++) {
         printf("%d\t%d\t%d", 
                processes[i].process_id, 
                processes[i].arrival_time,
                processes[i].burst_time);
         if (with_priority) printf("\t%d", processes[i].priority);
-        printf("\t%d\t%d\n", 
+        printf("\t%d\t%d\t\t%d\n", 
                processes[i].waiting_time,
-               processes[i].turnaround_time);
+               processes[i].turnaround_time,
+               processes[i].leave_time);
     }
     printf("\nAverage Waiting Time: %.2f\n", total_waiting_time / n);
     printf("Average Turnaround Time: %.2f\n", total_turnaround_time / n);
@@ -75,6 +77,7 @@ void fcfs(Process processes[], int n) {
         }
         processes[i].waiting_time = current_time - processes[i].arrival_time;
         current_time += processes[i].burst_time;
+        processes[i].leave_time = current_time;  // Set leave time
         processes[i].turnaround_time = processes[i].waiting_time + processes[i].burst_time;
 
         total_waiting_time += processes[i].waiting_time;
@@ -109,6 +112,7 @@ void sjf(Process processes[], int n) {
         if (remaining_time[shortest] == 0) {
             completed++;
             int finish_time = current_time + 1;
+            processes[shortest].leave_time = finish_time;  // Set leave time
             processes[shortest].waiting_time = finish_time - processes[shortest].burst_time - processes[shortest].arrival_time;
             processes[shortest].turnaround_time = finish_time - processes[shortest].arrival_time;
 
@@ -143,6 +147,7 @@ void priority_scheduling(Process processes[], int n) {
         if (processes[selected].remaining_time == 0) {
             completed++;
             int finish_time = current_time + 1;
+            processes[selected].leave_time = finish_time;  // Set leave time
             processes[selected].waiting_time = finish_time - processes[selected].burst_time - processes[selected].arrival_time;
             processes[selected].turnaround_time = finish_time - processes[selected].arrival_time;
 
@@ -169,6 +174,7 @@ void round_robin(Process processes[], int n, int quantum) {
                 current_time += exec_time;
                 if (processes[i].remaining_time == 0) {
                     completed++;
+                    processes[i].leave_time = current_time;  // Set leave time
                     processes[i].turnaround_time = current_time - processes[i].arrival_time;
                     processes[i].waiting_time = processes[i].turnaround_time - processes[i].burst_time;
                     total_waiting_time += processes[i].waiting_time;
